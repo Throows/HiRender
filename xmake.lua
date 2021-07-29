@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_requires("spdlog", "glfw", "glad", "glm")
+add_requires("spdlog", "glfw", "glew", "glm")
 
 set_runtimes("MD")
 
@@ -13,6 +13,6 @@ target("HiRender")
     add_headerfiles("src/*.h")
     add_includedirs("include/")
 
-    add_packages("spdlog", "glfw", "glad", "glm") 
+    add_packages("spdlog", "glfw", "glew", "glm") 
     add_syslinks("opengl32")
     set_symbols("debug")

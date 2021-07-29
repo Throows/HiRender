@@ -1,6 +1,6 @@
 #pragma once
 
-#define GLFW_INCLUDE_GLU
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -23,10 +23,11 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    HI_INFO("Init ! {0}", 0);
+    HI_INFO("GLFW and GLEW Init successfully !");
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "HIRender", NULL, NULL);
+
     if (!window)
     {
         glfwTerminate();
@@ -36,17 +37,35 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    if (glewInit() != GLEW_OK) {
+        HI_ERROR("ERROR ! FAILED TO INIT GLEW");
+    }
+
+    HI_INFO("OpenGL Context created ! Using version : {0}", glGetString(GL_VERSION));
+
+    float pos[6] = {
+        -0.5f, -0.5f,
+         0.0f, 0.5f,
+         0.5f, -0.5f
+    };
+
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), pos, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glBegin(GL_TRIANGLES);
-        glVertex2f(-0.5f, -0.5f);
-        glVertex2f(0.0f, 0.5f);
-        glVertex2f(0.5f, -0.5f);
-        glEnd();
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
