@@ -1,4 +1,4 @@
 # HiRender
 
 #dependencies
-GLFW GLAD GLW
+GLFW Vulkan GLW Spdlog
