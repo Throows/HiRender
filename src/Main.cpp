@@ -1,11 +1,14 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+#include <vulkan/vulkan.hpp>
 
 #define HI_TRACE(...) console->trace(__VA_ARGS__)
+#define HI_DEBUG(...) console->debug(__VA_ARGS__)
 #define HI_INFO(...) console->info(__VA_ARGS__)
 #define HI_WARN(...) console->warn(__VA_ARGS__)
 #define HI_ERROR(...) console->error(__VA_ARGS__)
@@ -18,14 +21,16 @@ int main(void)
     console->set_level(spdlog::level::trace);
 
     GLFWwindow* window;
+    VkInstance instance;
 
-    /* Initialize the library */
     if (!glfwInit())
         return -1;
 
-    HI_INFO("GLFW and GLEW Init successfully !");
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    /* Create a windowed mode window and its OpenGL context */
+    HI_TRACE("GLFW Init successfully !");
+
     window = glfwCreateWindow(640, 480, "HIRender", NULL, NULL);
 
     if (!window)
@@ -34,46 +39,45 @@ int main(void)
         return -1;
     } 
 
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
+    HI_TRACE("Window created successfully !");
 
-    if (glewInit() != GLEW_OK) {
-        HI_ERROR("ERROR ! FAILED TO INIT GLEW");
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "HiRender - Vulkan";
+    appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 1);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+
+    VkInstanceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+
+    uint32_t glfwExtensionCount = 0;
+    const char** glfwExtensions;
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+    createInfo.enabledExtensionCount = glfwExtensionCount;
+    createInfo.ppEnabledExtensionNames = glfwExtensions;
+
+    createInfo.enabledLayerCount = 0;
+
+    if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+        HI_ERROR("Failed to create Vulkan Instance !");
     }
+    HI_TRACE("Vulkan initialized successfully !");
 
-    HI_INFO("OpenGL Context created ! Using version : {0}", glGetString(GL_VERSION));
 
-    float pos[6] = {
-        -0.5f, -0.5f,
-         0.0f, 0.5f,
-         0.5f, -0.5f
-    };
-
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), pos, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
-        /* Poll for and process events */
         glfwPollEvents();
     }
 
+    vkDestroyInstance(instance, nullptr);
+    glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 }
