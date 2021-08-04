@@ -3,6 +3,7 @@ add_rules("mode.debug", "mode.release")
 add_requires("spdlog", "glfw", "vulkan-tools", "glm")
 
 set_runtimes("MD")
+set_languages("cxx17")
 
 target("HiRender")
     set_version("0.0.1")
