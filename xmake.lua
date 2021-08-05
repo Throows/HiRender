@@ -13,7 +13,14 @@ target("HiRender")
     add_files("src/*.cpp")
     add_headerfiles("src/*.h")
     add_includedirs("include/")
-
+    add_includedirs("shaders/")
     add_packages("spdlog", "glfw", "vulkan-tools", "glm") 
     add_syslinks("vulkan-1")
     set_symbols("debug")
+    after_build(function (target) 
+        -- TODO impl to move /shaders
+        print("moving files ! to : $(projectdir)\\shaders\\*.spv")
+        os.cp("$(projectdir)\\shaders\\*.spv", "$(projectdir)\\$(buildir)\\$(plat)\\$(arch)\\$(mode)\\shaders\\")
+
+    end)
+    
