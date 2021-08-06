@@ -4,7 +4,7 @@
 #include "Logger.h"
 
 
-int main(void)
+int main()
 {
     VulkanApplication application;
 	Hi::Logger::Init();
