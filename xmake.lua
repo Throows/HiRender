@@ -17,12 +17,12 @@ target("HiRenderVulkan")
     add_packages("spdlog", "glfw", "vulkan-tools", "glm") 
     add_syslinks("vulkan-1")
 
+    set_rundir("./bin/vulkan/$(os)_$(arch)_$(mode)")
+    set_targetdir("./bin/vulkan/$(os)_$(arch)_$(mode)")
+
     set_symbols("debug")
     after_build(function (target) 
-        -- TODO impl to move /shaders
-        print("moving files ! to : $(projectdir)\\shaders\\*.spv")
-        os.cp("$(projectdir)\\shaders\\*.spv", "$(projectdir)\\$(buildir)\\$(plat)\\$(arch)\\$(mode)\\shaders\\")
-
+        os.cp("$(projectdir)\\shaders\\*.spv", "$(projectdir)\\bin\\vulkan\\$(os)_$(arch)_$(mode)\\shaders\\")
     end)
 target_end()
 
@@ -36,5 +36,13 @@ target("HiRenderOpenGL")
     add_packages("spdlog", "glfw", "glad", "glm") 
     add_syslinks("opengl32")
     
+    
+    set_rundir("./bin/opengl/$(os)_$(arch)_$(mode)")
+    set_targetdir("./bin/opengl/$(os)_$(arch)_$(mode)")
+
     set_symbols("debug")
+    after_build(function (target)         
+        os.cp("$(projectdir)\\shaders\\*.vert", "$(projectdir)\\bin\\opengl\\$(os)_$(arch)_$(mode)\\shaders\\")
+        os.cp("$(projectdir)\\shaders\\*.frag", "$(projectdir)\\bin\\opengl\\$(os)_$(arch)_$(mode)\\shaders\\")
+    end)
 target_end()
