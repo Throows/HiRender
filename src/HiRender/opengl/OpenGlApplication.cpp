@@ -5,6 +5,7 @@ OpenGLApplication::OpenGLApplication(uint32_t& width, uint32_t& height)
 	this->m_width = width;
 	this->m_height = height;
 	this->window = nullptr;
+    this->shader = Hi::Shader();
 }
 
 void OpenGLApplication::Run()
@@ -19,8 +20,13 @@ void OpenGLApplication::Run()
         glClearColor(1.0f, 0.7f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        float timeValue = glfwGetTime();
+        float redValue = sin(timeValue) / 2.0f + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shader.getShaderProgram(), "ourColor");
+        glUniform4f(vertexColorLocation, redValue, 0.0f, 0.0f, 1.0f);
+
        
-        glUseProgram(this->shaderProgram);
+        shader.UseShader();
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
@@ -33,75 +39,14 @@ void OpenGLApplication::Run()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
-	glfwDestroyWindow(this->window);
+    glDeleteProgram(shader.getShaderProgram());
+    glfwDestroyWindow(this->window);
 	glfwTerminate();
 }
 
 void OpenGLApplication::FrameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-}
-
-std::string OpenGLApplication::readFile(const std::string& filename)
-{
-    std::ifstream file(filename);
-
-    if (!file.is_open()) {
-        throw std::runtime_error(std::string{ "échec de l'ouverture du fichier " } + filename + "!");
-    }
-    
-    std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    file.close();
-    return str;
-}
-
-unsigned int OpenGLApplication::CompileShader(GLenum shaderType, const std::string& filename)
-{
-    unsigned int shader = glCreateShader(shaderType);
-    std::string str = readFile(filename);
-    const char* shaderSource = str.c_str();
-    glShaderSource(shader, 1, &shaderSource, NULL);
-    glCompileShader(shader);
-    return shader;
-}
-
-void OpenGLApplication::RegisterShaderProgram(const std::string& vertFile, const std::string& fragFile)
-{
-
-    int success;
-    char infoLog[512];
-
-    unsigned int vertexShader = CompileShader(GL_VERTEX_SHADER, vertFile);
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        HI_ERROR("ERROR::SHADER::VERTEX::COMPILATION_FAILED : {0}", infoLog);
-    }
-   
-    unsigned int fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragFile);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        HI_ERROR("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED : {0}", infoLog);
-    }
-
-
-    this->shaderProgram = glCreateProgram();
-    glAttachShader(this->shaderProgram, vertexShader);
-    glAttachShader(this->shaderProgram, fragmentShader);
-    glLinkProgram(this->shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        HI_ERROR("ERROR::SHADER::LINK::COMPILATION_FAILED : {0}", infoLog);
-    }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
 }
 
 void OpenGLApplication::Init()
@@ -130,13 +75,13 @@ void OpenGLApplication::Init()
 
     glViewport(0, 0, this->m_width, this->m_height);
     
-    RegisterShaderProgram("shaders/shader.vert", "shaders/shader.frag");
-
+    this->shader.Init("shaders/shader.vert", "shaders/shader.frag");
+    
     float vertices[] = {
-     0.5f,  0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f, 
-    -0.5f,  0.5f, 0.0f  
+     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f,
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+    -0.5f,  0.5f, 0.0f, 0.0f, 0.5f, 0.0f
     };
 
     unsigned int indices[] = { 
@@ -156,8 +101,11 @@ void OpenGLApplication::Init()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
