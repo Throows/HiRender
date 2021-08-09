@@ -1,4 +1,4 @@
 # HiRender
 
 #dependencies
-GLFW Vulkan GLW Spdlog
+GLFW Opengl Vulkan GLW Spdlog
