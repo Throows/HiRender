@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_requires("spdlog", "glfw", "vulkan-tools", "glad", "glm")
+add_requires("spdlog", "glfw", "vulkan-tools", "glad", "stb", "glm")
 
 set_runtimes("MD")
 set_languages("cxx17")
@@ -33,7 +33,7 @@ target("HiRenderOpenGL")
     add_files("src/HiRender/opengl/*.cpp")
     add_headerfiles("src/HiRender/opengl/*.h")
 
-    add_packages("spdlog", "glfw", "glad", "glm") 
+    add_packages("spdlog", "glfw", "glad", "stb", "glm") 
     add_syslinks("opengl32")
     
     
@@ -44,5 +44,6 @@ target("HiRenderOpenGL")
     after_build(function (target)         
         os.cp("$(projectdir)\\shaders\\*.vert", "$(projectdir)\\bin\\opengl\\$(os)_$(arch)_$(mode)\\shaders\\")
         os.cp("$(projectdir)\\shaders\\*.frag", "$(projectdir)\\bin\\opengl\\$(os)_$(arch)_$(mode)\\shaders\\")
+        os.cp("$(projectdir)\\resources\\textures\\*", "$(projectdir)\\bin\\opengl\\$(os)_$(arch)_$(mode)\\resources\\textures\\")
     end)
 target_end()

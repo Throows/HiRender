@@ -1,6 +1,8 @@
 #pragma once
 
+#include <stb_image.h>
 #include "Shader.h"
+
 
 class OpenGLApplication
 {
@@ -17,6 +19,7 @@ private:
 	uint32_t m_height;
 
 	Hi::Shader shader;
+	unsigned int texture;
 
 	unsigned int VBO;
 	unsigned int VAO;

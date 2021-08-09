@@ -68,7 +68,7 @@ namespace Hi {
         glAttachShader(this->m_shaderProgram, vertex);
         glAttachShader(this->m_shaderProgram, fragment);
         glLinkProgram(this->m_shaderProgram);
-        // print linking errors if any
+        
         glGetProgramiv(this->m_shaderProgram, GL_LINK_STATUS, &success);
         if (!success)
         {
