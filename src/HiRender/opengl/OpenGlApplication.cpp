@@ -1,4 +1,4 @@
-
+#define BOUNCE(c,m) bounce<c, decltype(&c::m), &c::m>
 #define STB_IMAGE_IMPLEMENTATION
 #include "OpenGlApplication.h"
 
@@ -72,6 +72,9 @@ void OpenGLApplication::Run()
 	glfwTerminate();
 }
 
+
+typedef GLFWframebuffersizefun (*test) (GLFWwindow*, int, int);
+
 void OpenGLApplication::Init()
 {
 
@@ -94,6 +97,9 @@ void OpenGLApplication::Init()
 	}
 
     glEnable(GL_DEPTH_TEST);
+
+    glfwSetWindowUserPointer(this->window, this);
+    RegisterCallbacks();
 
     glViewport(0, 0, m_width, m_height);
     
@@ -189,6 +195,20 @@ void OpenGLApplication::Init()
     glBindVertexArray(0);
 }
 
+void OpenGLApplication::RegisterCallbacks()
+{
+    glfwSetFramebufferSizeCallback(this->window, [](GLFWwindow* window, int width, int height) {
+        static_cast<OpenGLApplication*>(glfwGetWindowUserPointer(window))->FrameBufferSizeCallback(window, width, height);
+        });
+    glfwSetCursorPosCallback(this->window, [](GLFWwindow * window, double xPos, double yPos) {
+        static_cast<OpenGLApplication*>(glfwGetWindowUserPointer(window))->mouse_callback(window, xPos, yPos);
+        });
+
+    glfwSetScrollCallback(this->window, [](GLFWwindow* window, double xOffset, double yOffset) {
+        static_cast<OpenGLApplication*>(glfwGetWindowUserPointer(window))->scroll_callback(window, xOffset, yOffset);
+        });
+}
+
 void OpenGLApplication::FrameBufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -218,7 +238,6 @@ void OpenGLApplication::scroll_callback(GLFWwindow* window, double xoffset, doub
 {
     camera.ProcessMouseScroll(yoffset);
 }
-
 
 void OpenGLApplication::ProcessInput()
 {

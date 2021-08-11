@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stb_image.h>
+#include <optional>
 #include "Shader.h"
 #include "Camera.h"
 
@@ -11,14 +12,12 @@ public:
 	OpenGLApplication(uint32_t &width, uint32_t &height);
 	
 	void Init();
-	void RegisterCallBacks(OpenGLApplication& application);
+	void RegisterCallbacks();
 	void Run();
 
 	void FrameBufferSizeCallback(GLFWwindow* window, int width, int height);
 	void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 	void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
-	GLFWwindow* GetWindow() { return this->window; }
 
 private:
 	GLFWwindow* window;
